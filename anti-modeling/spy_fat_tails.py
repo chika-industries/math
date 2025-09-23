@@ -17,8 +17,8 @@ References:
 - Taleb, N. N. "Statistical Consequences of Fat Tails"
 - MAD methodology: https://www.youtube.com/watch?v=iKJy2YpYPe8&t=6s
 
-Author: [Your Name]
-Date: [Current Date]
+Author: AI-generated
+Date: 2024/9
 """
 
 import yfinance as yf
