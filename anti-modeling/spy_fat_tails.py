@@ -33,7 +33,7 @@ def download_sp500_data_debug():
     print("Downloading S&P 500 data...")
     
     # Download with explicit parameters
-    data = yf.download('^GSPC', period="5y", auto_adjust=True, progress=True)
+    data = yf.download('^GSPC', period="50y", auto_adjust=True, progress=True)
     
     print(f"Data shape: {data.shape}")
     print(f"Columns: {data.columns}")
