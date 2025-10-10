@@ -4,23 +4,47 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <windows.h>
+
+std::regex dividendRegex() {
+    return std::regex(
+        R"(\b(dividend(s)?|dividend[-\s]?policy|dividend[-\s]?per[-\s]?share|payout[-\s]?ratio|cash[-\s]?return)\b)",
+        std::regex_constants::icase);
+}
+
+std::regex buybackRegex() {
+    return std::regex(
+        R"(\b(buy[-\s]?back(s|ed|ing)?|repurchase(d|s|ing)?|bought\s+back|share[-\s]?repurchase|repurchase[-\s]?(program|plan|authorization))\b)",
+        std::regex_constants::icase);
+}
 
 int main() {
+    SetConsoleOutputCP(CP_UTF8);
     // Filepath to the full annual report text
-    
-    std::string company = "Coca Cola";
-    
-    // Example alternative file (Coke report)
-    std::string filename = "KO2024_FULL.txt";
+
+    std::string company = "PSBC";    
+    std::string filename = "psbc2024_FULL.txt";
     std::string keyword;
-        
+
     // Prompt user to enter a keyword to search for
     // Could be dividend, buyback, repurchase, unit case volume, net interest margin, net interest income, etc.
     // Buffet simple businesses - really 1 keyword
     // Coke: unit case volume
     // PSBC: net interest income (or margin)
-    std::cout << "Enter keyword to search for (e.g., dividend, buyback, repurchase, unit case volume, net interest margin, net interest income): ";
-    std::getline(std::cin, keyword);
+
+    /* Choose what to do*/    
+    std::regex keywordRegex = dividendRegex();  // 1. Dividend mode
+    //std::regex keywordRegex = buybackRegex(); // 2. Buyback mode   
+
+
+
+    //std::regex keywordRegex("\\b" + keyword + "\\b", std::regex_constants::icase);
+
+    //std::cout << "Enter keyword regex to search for, e.g.: \n \
+    //    dividend, buyback, repurchase, unit case volume, net interest margin, net interest income \n \
+    //    buyback | buy back | repurchase | repurchased | repurchasing | bought back | buybacks \n \
+    //    dividend | dividends): ";
+    //std::getline(std::cin, keyword);
 
     // Step 1. Read entire text
     std::ifstream file(filename);
@@ -51,7 +75,7 @@ int main() {
     }
 
     // Step 3: Build a case-insensitive regex for the user keyword
-    std::regex keywordRegex("\\b" + keyword + "\\b", std::regex_constants::icase);
+    //std::regex keywordRegex("\\b" + keyword + "\\b", std::regex_constants::icase);
     int snippetCount = 0;
 
     std::cout << "\nCompany name: [" << company << "]\n";
@@ -64,7 +88,7 @@ int main() {
             if (i > 0) std::cout << sentences[i - 1] << " ";
 
             // Print the sentence containing the keyword
-            std::cout << sentences[i] << " ";
+            std::cout << "\n\n < " << sentences[i] << " >\n\n ";
 
             // Include next sentence for context, if it exists
             if (i + 1 < sentences.size()) std::cout << sentences[i + 1];
