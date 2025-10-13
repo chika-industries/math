@@ -1,10 +1,16 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <windows.h>
+
+struct CompanyFile {
+    std::string name;
+    std::string filename;
+};
 
 std::regex dividendRegex() {
     return std::regex(
@@ -18,33 +24,59 @@ std::regex buybackRegex() {
         std::regex_constants::icase);
 }
 
+std::regex moatRegex() {
+    return std::regex(
+        R"(\b(competitive\s+advantage|economic\s+moat|barrier(s)?\s+to\s+entry|pricing\s+power|brand\s+(strength|recognition)|network\s+effect(s)?|cost\s+advantage|switching\s+cost(s)?)\b)",
+        std::regex_constants::icase);
+}
+
+std::regex capitalAllocationRegex() {
+    return std::regex(
+        R"(\b(capital\s+allocation|reinvestment|return\s+on\s+capital|return\s+on\s+invest(ed|ment)\s+capital|roi(c|e)|internal\s+rate\s+of\s+return|reinvestment\s+opportunit(y|ies))\b)",
+        std::regex_constants::icase);
+}
+
+std::regex leverageRegex() {
+    return std::regex(
+        R"(\b(leverage(d|s)?|debt\s+(to|\/)\s+equity|interest\s+coverage|net\s+debt|gearing\s+ratio|liquidity\s+risk|refinancing\s+risk|credit\s+facility|covenant(s)?)\b)",
+        std::regex_constants::icase);
+}
+
 int main() {
     SetConsoleOutputCP(CP_UTF8);
+    std::string keyword;
+    
     // Filepath to the full annual report text
 
-    std::string company = "PSBC";    
-    std::string filename = "psbc2024_FULL.txt";
-    std::string keyword;
-
+    std::vector<CompanyFile> companies = {
+        {"Coca Cola",  "KO2024_FULL.txt"},
+        {"Mitsui O S K", "MitsuiOSK_FULL.txt"},
+        {"VISA Inc.", "2024Visa_FULL.txt"},
+        {"Marubeni", "2024Marubeni_FULL.txt"},        
+        {"Berkshire Hathaway", "BRK2024_FULL.txt"}
+    };
+    
+    std::string company = companies[1].name;
+    std::string filename = companies[1].filename;
+    
     // Prompt user to enter a keyword to search for
     // Could be dividend, buyback, repurchase, unit case volume, net interest margin, net interest income, etc.
     // Buffet simple businesses - really 1 keyword
     // Coke: unit case volume
     // PSBC: net interest income (or margin)
 
-    /* Choose what to do*/    
-    std::regex keywordRegex = dividendRegex();  // 1. Dividend mode
-    //std::regex keywordRegex = buybackRegex(); // 2. Buyback mode   
+    enum class Mode { Dividend, Buyback, CapitalAllocation, Leverage };
 
+    // *** Choose what to do ***
+    Mode currentMode = Mode::Leverage;
 
-
-    //std::regex keywordRegex("\\b" + keyword + "\\b", std::regex_constants::icase);
-
-    //std::cout << "Enter keyword regex to search for, e.g.: \n \
-    //    dividend, buyback, repurchase, unit case volume, net interest margin, net interest income \n \
-    //    buyback | buy back | repurchase | repurchased | repurchasing | bought back | buybacks \n \
-    //    dividend | dividends): ";
-    //std::getline(std::cin, keyword);
+    std::regex myRegex;
+    switch (currentMode) {
+        case Mode::Dividend: myRegex = dividendRegex(); break;
+        case Mode::Buyback: myRegex = buybackRegex(); break;
+        case Mode::CapitalAllocation: myRegex = capitalAllocationRegex(); break;
+        case Mode::Leverage: myRegex = leverageRegex(); break;
+    }
 
     // Step 1. Read entire text
     std::ifstream file(filename);
@@ -75,13 +107,13 @@ int main() {
     }
 
     // Step 3: Build a case-insensitive regex for the user keyword
-    //std::regex keywordRegex("\\b" + keyword + "\\b", std::regex_constants::icase);
+    //std::regex myRegex("\\b" + keyword + "\\b", std::regex_constants::icase);
     int snippetCount = 0;
 
     std::cout << "\nCompany name: [" << company << "]\n";
     // Step 4: Search through sentences for the keyword and print surrounding context
     for (size_t i = 0; i < sentences.size(); ++i) {
-        if (std::regex_search(sentences[i], keywordRegex)) {
+        if (std::regex_search(sentences[i], myRegex)) {
             std::cout << "\n--- " << keyword << " Snippet " << ++snippetCount << " ---\n";
 
             // Include previous sentence for context, if it exists
